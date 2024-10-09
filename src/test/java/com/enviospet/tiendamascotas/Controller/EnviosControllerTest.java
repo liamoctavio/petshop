@@ -15,9 +15,9 @@ import java.util.Optional;
 import com.enviospet.tiendamascotas.Model.Envios;
 
 
-import com.enviospet.tiendamascotas.Model.Envios;
 import com.enviospet.tiendamascotas.Service.EnviosService;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -76,6 +76,54 @@ public class EnviosControllerTest {
                 .andExpect(jsonPath("$.destinatario").value("John Doe"));
 
         verify(enviosService, times(1)).listarEnviosPorId(1L);
+    }
+
+
+    @Test
+    public void testCrearEnvio() throws Exception {
+        Envios envio = new Envios();
+        envio.setId(1L);
+        envio.setDestinatario("John Doe");
+
+        when(enviosService.crearEnvio(any(Envios.class))).thenReturn(envio);
+
+        mockMvc.perform(post("/envios")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"destinatario\": \"John Doe\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.destinatario").value("John Doe"));
+
+        verify(enviosService, times(1)).crearEnvio(any(Envios.class));
+    }
+
+
+    @Test
+    public void testActualizarEnvio() throws Exception {
+        Envios envio = new Envios();
+        envio.setId(1L);
+        envio.setDestinatario("John Doe");
+    
+        when(enviosService.actualizarEnvio(eq(1L), any(Envios.class))).thenReturn(envio);
+    
+        mockMvc.perform(put("/envios/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"destinatario\": \"John Doe\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.destinatario").value("John Doe"));
+    
+        verify(enviosService, times(1)).actualizarEnvio(eq(1L), any(Envios.class));
+    }
+
+    @Test
+    public void testEliminarEnvio() throws Exception {
+        doNothing().when(enviosService).eliminarEnvio(1L);
+    
+        mockMvc.perform(delete("/envios/1"))
+                .andExpect(status().isNoContent());
+    
+        verify(enviosService, times(1)).eliminarEnvio(1L);
     }
 }
 
